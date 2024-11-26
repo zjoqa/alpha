@@ -20,6 +20,8 @@ public class Dialogue
     
     [Tooltip("선택지")]
     public DialogueChoice[] choices;
+
+    public int _nextDialogueIndex;
 }
 
 [System.Serializable]

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-
+using System.Collections.Generic;
 public class DialogueManager : MonoBehaviour
 {
     [SerializeField]
@@ -12,11 +12,28 @@ public class DialogueManager : MonoBehaviour
     private GameObject choicePanel; // 선택지 UI 패널
     [SerializeField]
     private Button choicePrefab; // 선택지 버튼 프리팹
+    [SerializeField]
+    private float buttonSpacing = 60f; // 선택지 버튼 간격
+    [SerializeField]
+    private float startY = 100f; // 선택지 버튼 y 좌표
+    [SerializeField]
+    private float startX = 0f; // 선택지 버튼 x 좌표
+    [SerializeField]
+    private Vector2 buttonSize = new Vector2(600f, 100f); // 선택지 버튼 크기
+
 
     Dialogue[] dialogues;
 
+    private void Start() {
+        for(int i = 0; i < dialogues.Length; i++) {
+            Debug.Log(dialogues[i]._nextDialogueIndex);
+        }
+    }
+
     bool isDialogue = false; // 현재 대화중인지
     bool isNext = false; // 다음 대사 대기
+    bool isChoice = false; // 선택 중이 아닐때
+    bool isFinish = false; // 대화 종료 여부
 
     int lineCount = 0; // 대화 카운트
     int contextCount = 0; // 대사 카운트
@@ -25,64 +42,85 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] float textDelay;
 
     private void Update() {
-        if(isDialogue) // 대화중인 경우
+        if(!isDialogue) return;
+        
+        if(isNext && Input.GetKeyDown(KeyCode.Space)) 
         {
-            if(isNext&&Input.GetKeyDown(KeyCode.Space)) // 대화 중 스페이스바 입력 시
+            isNext = false;
+            txt_Dialogue.text = "";
+            
+            // 현재 대화의 다음 문장이 있는 경우
+            if(contextCount + 1 < dialogues[lineCount].contexts.Length) 
             {
-                isNext = false; 
-                txt_Dialogue.text = ""; // 대사 초기화
-                if(++contextCount<dialogues[lineCount].contexts.Length) // contextcount 증가한 값이 대사 개수보다 작은 경우
+                contextCount++;
+                StartCoroutine(TypeWriter());
+            }
+            // 현재 대화가 끝났을 때
+            else 
+            {
+                contextCount = 0;
+                
+                // 다음 대사 번호가 지정된 경우
+                if(dialogues[lineCount]._nextDialogueIndex > 0)
                 {
-                    StartCoroutine(TypeWriter()); // 타자 효과 시작
-                }
-                else // contextCount 가 대사 개수를 초과한 경우
-                {
-                    contextCount = 0; // contextCount 초기화
-                    if(++lineCount < dialogues.Length) // lineCount 증가한 값이 대화 개수보다 작은 경우
+                    lineCount = dialogues[lineCount]._nextDialogueIndex - 1;
+                    if(lineCount < dialogues.Length)
                     {
-                        StartCoroutine(TypeWriter()); // 타자 효과 시작
+                        StartCoroutine(TypeWriter());
                     }
                     else
                     {
                         EndDialogue();
                     }
-                }   
+                }
+                // 다음 순차적인 대화로 진행
+                else if(lineCount + 1 < dialogues.Length)
+                {
+                    lineCount++;
+                    StartCoroutine(TypeWriter());
+                }
+                // 모든 대화가 끝난 경우
+                else
+                {
+                    EndDialogue();
+                }
             }
         }
     }
 
 
-    public void ShowChoices(DialogueChoice[] choices)
+    public void ShowChoices(DialogueChoice[] choices) // 선택지 표시
     {
-        if(choices == null || choices.Length == 0) return;
+        if(choices == null || choices.Length == 0) return; // 선택지가 없으면 return
 
-        choicePanel.SetActive(true);
+        isChoice = true;
+        choicePanel.SetActive(true);  // 선택지 패널 활성화
 
-        float buttonSpacing = 60f;
-        float startY = 100f;
-
-        for(int i = 0; i < choices.Length; i++)
+        for(int i = 0; i < choices.Length; i++) // 선택지 개수만큼 반복
         {
-            Button choiceButton = Instantiate(choicePrefab, choicePanel.transform);
-            RectTransform rectTransform = choiceButton.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = new Vector2(0, startY - (buttonSpacing * i));
-            rectTransform.sizeDelta = new Vector2(600f, 100f);
+            Button choiceButton = Instantiate(choicePrefab, choicePanel.transform); // 선택지 버튼 생성
+            RectTransform rectTransform = choiceButton.GetComponent<RectTransform>(); // 선택지 버튼 위치 설정
+            rectTransform.anchoredPosition = new Vector2(startX, startY - (buttonSpacing * i)); // 선택지 버튼 위치 설정
+            rectTransform.sizeDelta = buttonSize; 
 
             DialogueChoiceButton choiceButtonComponent = choiceButton.GetComponent<DialogueChoiceButton>();
-            choiceButtonComponent.Setup(choices[i], OnChoiceSelected);
+            choiceButtonComponent.Setup(choices[i], OnChoiceSelected); // 
         }
     }
 
 
-    public void OnChoiceSelected(DialogueChoice choice)
+    public void OnChoiceSelected(DialogueChoice choice) // 선택지 선택 시
     {
         choicePanel.SetActive(false);
         ClearChoices();
-        
-        if (choice.nextDialogueIndex >= 0 && choice.nextDialogueIndex < dialogues.Length)
+        isChoice = false;
+        if (choice.nextDialogueIndex >= 0 && choice.nextDialogueIndex <= dialogues.Length)
         {
             lineCount = choice.nextDialogueIndex - 1;
             contextCount = 0;
+            txt_Dialogue.text = "";
+            txt_Name.text = "";
+            
             StartCoroutine(TypeWriter());
         }
         else
@@ -94,7 +132,7 @@ public class DialogueManager : MonoBehaviour
 
     private void ClearChoices() // 선택지 초기화
     {
-        foreach(Transform child in choicePanel.transform)
+        foreach(Transform child in choicePanel.transform) // 선택지 패널 자식 오브젝트 초기화
         {
             Destroy(child.gameObject);
         }
@@ -106,7 +144,6 @@ public class DialogueManager : MonoBehaviour
         txt_Dialogue.text = "";
         txt_Name.text = "";
         dialogues = _Dialogues;
-
         StartCoroutine(TypeWriter());
     }
 
@@ -121,20 +158,22 @@ public class DialogueManager : MonoBehaviour
     }
 
 
-    IEnumerator TypeWriter()
+    IEnumerator TypeWriter() // 타자 효과 시작
     {
-        string t_ReplaceText = dialogues[lineCount].contexts[contextCount];
-        t_ReplaceText = t_ReplaceText.Replace("'", ",");
+        string t_ReplaceText = dialogues[lineCount].contexts[contextCount]; // 대사 가져오기
+        t_ReplaceText = t_ReplaceText.Replace("'", ","); // 대사에서 쉼표(,)로 대체
 
-        txt_Name.text = dialogues[lineCount].name;
-        for(int i = 0; i < t_ReplaceText.Length; i++)
+        txt_Name.text = dialogues[lineCount].name; // 이름 표시
+        for(int i = 0; i < t_ReplaceText.Length; i++) // 대사 길이만큼 반복
         {
-            txt_Dialogue.text += t_ReplaceText[i];
+            txt_Dialogue.text += t_ReplaceText[i]; // 대사 표시
             yield return new WaitForSeconds(textDelay);
         }
+        isFinish = true; // 대사 종료
+
 
         // 선택지가 존재하고 대사가 끝나면 선택지 표시
-        if(dialogues[lineCount].choices != null && dialogues[lineCount].choices.Length > 0)
+        if(dialogues[lineCount].choices != null && dialogues[lineCount].choices.Length > 0 && isFinish)
         {
             ShowChoices(dialogues[lineCount].choices);
         }

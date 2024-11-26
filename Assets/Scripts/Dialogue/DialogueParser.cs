@@ -41,7 +41,22 @@ public class DialogueParser : MonoBehaviour
                             dialogue.choices[j] = new DialogueChoice(); // 선택지 개수만큼 반복하여 실제 DialogueChoice 객체 할당
                             dialogue.choices[j].choiceText = choiceTexts[j].Trim(); // 선택지 텍스트 설정
                             dialogue.choices[j].nextDialogueIndex = int.Parse(nextIndices[j].Trim()); // 다음 대화 인덱스 설정
-                            Debug.Log("choiceText: " + dialogue.choices[j].choiceText + ", nextDialogueIndex: " + dialogue.choices[j].nextDialogueIndex); 
+                        }
+                    }
+                }
+                else if(row.Length >= 5 && string.IsNullOrEmpty(row[3]))
+                {
+                    string nextDialogueIndex = row[4].Trim();
+                    if(!string.IsNullOrEmpty(nextDialogueIndex))
+                    {
+                        // TryParse를 사용하여 안전하게 변환
+                        if(int.TryParse(nextDialogueIndex, out int result))
+                        {
+                            dialogue._nextDialogueIndex = result;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"다음 대화 인덱스 값 '{nextDialogueIndex}'을(를) 숫자로 변환할 수 없습니다.");
                         }
                     }
                 }

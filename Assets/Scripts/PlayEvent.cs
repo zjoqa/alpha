@@ -10,6 +10,6 @@ public class PlayEvent : MonoBehaviour
     {
         theDM = FindAnyObjectByType<DialogueManager>(); // 대화창 매니저 찾아오기
         interactiveEvent = GetComponent<InteractiveEvent>();
-        theDM.ShowDialogue(interactiveEvent.GetDialogue());
+        theDM.ShowDialogue(interactiveEvent.GetDialogue()); // DialogueManager 에 Dialogue 정보 전달
     }  
 }
