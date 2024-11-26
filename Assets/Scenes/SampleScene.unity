@@ -199,8 +199,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 52345054}
-  - component: {fileID: 52345055}
   - component: {fileID: 52345056}
+  - component: {fileID: 52345055}
   m_Layer: 0
   m_Name: DialogSystem01
   m_TagString: Untagged
@@ -237,47 +237,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dialogueEvent:
     name: 
-    line: {x: 1, y: 10}
+    line: {x: 1, y: 5}
     dialogues:
     - name: 
       contexts: []
       choices: []
+      isEnd: 0
       _nextDialogueIndex: 0
     - name: 
       contexts: []
       choices: []
+      isEnd: 0
       _nextDialogueIndex: 0
     - name: 
       contexts: []
       choices: []
+      isEnd: 0
       _nextDialogueIndex: 0
     - name: 
       contexts: []
       choices: []
+      isEnd: 0
       _nextDialogueIndex: 0
     - name: 
       contexts: []
       choices: []
-      _nextDialogueIndex: 0
-    - name: 
-      contexts: []
-      choices: []
-      _nextDialogueIndex: 0
-    - name: 
-      contexts: []
-      choices: []
-      _nextDialogueIndex: 0
-    - name: 
-      contexts: []
-      choices: []
-      _nextDialogueIndex: 0
-    - name: 
-      contexts: []
-      choices: []
-      _nextDialogueIndex: 0
-    - name: 
-      contexts: []
-      choices: []
+      isEnd: 0
       _nextDialogueIndex: 0
 --- !u!114 &52345056
 MonoBehaviour:
@@ -325,7 +310,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 207, y: 44}
+  m_AnchoredPosition: {x: 302.8, y: 44}
   m_SizeDelta: {x: 1125.1, y: 85}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &233261272
@@ -725,6 +710,7 @@ MonoBehaviour:
   startY: 100
   startX: 0
   buttonSize: {x: 600, y: 100}
+  dialogues: []
   textDelay: 0.01
 --- !u!4 &661794680
 Transform:

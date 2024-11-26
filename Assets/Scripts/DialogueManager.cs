@@ -22,13 +22,7 @@ public class DialogueManager : MonoBehaviour
     private Vector2 buttonSize = new Vector2(600f, 100f); // 선택지 버튼 크기
 
 
-    Dialogue[] dialogues;
-
-    private void Start() {
-        for(int i = 0; i < dialogues.Length; i++) {
-            Debug.Log(dialogues[i]._nextDialogueIndex);
-        }
-    }
+    public Dialogue[] dialogues;
 
     bool isDialogue = false; // 현재 대화중인지
     bool isNext = false; // 다음 대사 대기
@@ -42,52 +36,55 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] float textDelay;
 
     private void Update() {
-        if(!isDialogue) return;
-        
-        if(isNext && Input.GetKeyDown(KeyCode.Space)) 
-        {
-            isNext = false;
-            txt_Dialogue.text = "";
-            
-            // 현재 대화의 다음 문장이 있는 경우
-            if(contextCount + 1 < dialogues[lineCount].contexts.Length) 
-            {
-                contextCount++;
-                StartCoroutine(TypeWriter());
-            }
-            // 현재 대화가 끝났을 때
-            else 
-            {
-                contextCount = 0;
-                
-                // 다음 대사 번호가 지정된 경우
-                if(dialogues[lineCount]._nextDialogueIndex > 0)
-                {
-                    lineCount = dialogues[lineCount]._nextDialogueIndex - 1;
-                    if(lineCount < dialogues.Length)
-                    {
-                        StartCoroutine(TypeWriter());
-                    }
-                    else
-                    {
-                        EndDialogue();
-                    }
-                }
-                // 다음 순차적인 대화로 진행
-                else if(lineCount + 1 < dialogues.Length)
-                {
-                    lineCount++;
-                    StartCoroutine(TypeWriter());
-                }
-                // 모든 대화가 끝난 경우
-                else
-                {
-                    EndDialogue();
-                }
-            }
-        }
+        ShowDialouge();
     }
 
+    private void ShowDialouge()
+    {
+                if(!isDialogue || !isNext || !Input.GetKeyDown(KeyCode.Space)) return;
+        
+        isNext = false;
+        txt_Dialogue.text = "";
+        
+        // 현재 대화가 종료 표시된 경우
+        if(isFinish && dialogues[lineCount].isEnd)
+        {
+            EndDialogue();
+            return;
+        }
+        
+        // 현재 대화의 다음 문장이 있는 경우
+        if(contextCount + 1 < dialogues[lineCount].contexts.Length) 
+        {
+            contextCount++;
+            StartCoroutine(TypeWriter());
+            return;
+        }
+        
+        // 현재 대화가 끝난 경우
+        contextCount = 0;
+        
+        // 다음 대사 번호가 지정된 경우
+        if(dialogues[lineCount]._nextDialogueIndex > 0)
+        {
+            lineCount = dialogues[lineCount]._nextDialogueIndex - 1;
+            if(lineCount < dialogues.Length)
+            {
+                StartCoroutine(TypeWriter());
+                return;
+            }
+        }
+        // 다음 순차적인 대화가 있는 경우
+        else if(lineCount + 1 < dialogues.Length)
+        {
+            lineCount++;
+            StartCoroutine(TypeWriter());
+            return;
+        }
+        
+        // 위의 조건들을 만족하지 않으면 대화 종료
+        EndDialogue();
+    }
 
     public void ShowChoices(DialogueChoice[] choices) // 선택지 표시
     {
@@ -155,6 +152,8 @@ public class DialogueManager : MonoBehaviour
         dialogues = null;
         isNext = false;
         HideUI();
+        Debug.Log("대화 종료");
+        isFinish = true;
     }
 
 
@@ -164,16 +163,23 @@ public class DialogueManager : MonoBehaviour
         t_ReplaceText = t_ReplaceText.Replace("'", ","); // 대사에서 쉼표(,)로 대체
 
         txt_Name.text = dialogues[lineCount].name; // 이름 표시
+        txt_Dialogue.text = ""; // 대사 초기화
+        isFinish = false; // 대사 종료 플래그 초기화
+
         for(int i = 0; i < t_ReplaceText.Length; i++) // 대사 길이만큼 반복
         {
             txt_Dialogue.text += t_ReplaceText[i]; // 대사 표시
             yield return new WaitForSeconds(textDelay);
         }
+        
         isFinish = true; // 대사 종료
 
-
         // 선택지가 존재하고 대사가 끝나면 선택지 표시
-        if(dialogues[lineCount].choices != null && dialogues[lineCount].choices.Length > 0 && isFinish)
+        if(dialogues != null && 
+            lineCount < dialogues.Length && 
+            dialogues[lineCount] != null && 
+            dialogues[lineCount].choices != null && 
+            dialogues[lineCount].choices.Length > 0)
         {
             ShowChoices(dialogues[lineCount].choices);
         }

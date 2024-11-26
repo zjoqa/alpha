@@ -21,6 +21,9 @@ public class Dialogue
     [Tooltip("선택지")]
     public DialogueChoice[] choices;
 
+    [Tooltip("대화 종료 여부")]
+    public bool isEnd;
+
     public int _nextDialogueIndex;
 }
 

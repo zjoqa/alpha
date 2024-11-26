@@ -13,4 +13,10 @@ public class InteractiveEvent : MonoBehaviour
         dialogueEvent.dialogues = DatabaseManager.instance.GetDialogue((int)dialogueEvent.line.x, (int)dialogueEvent.line.y);
         return dialogueEvent.dialogues;
     }
+
+    public void SetDialogueEvent(DialogueEvent newEvent)
+    {
+        dialogueEvent.line = newEvent.line;
+        dialogueEvent.dialogues = newEvent.dialogues;
+    }
 }

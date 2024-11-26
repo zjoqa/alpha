@@ -28,7 +28,7 @@ public class DialogueParser : MonoBehaviour
                 contextList.Add(row[2]); // 임시 리스트에 대화 내용 추가
                 
                 // 선택지가 존재하는 경우
-                if (row.Length >= 5 && !string.IsNullOrEmpty(row[3]) && !string.IsNullOrEmpty(row[4]))
+                if (row.Length >= 6 && !string.IsNullOrEmpty(row[3]) && !string.IsNullOrEmpty(row[4]))
                 {
                     string[] choiceTexts = row[3].Split('|'); // 선택지 텍스트를 쉼표(,)로 분리하여 choiceTexts에 저장
                     string[] nextIndices = row[4].Split('|'); // 다음 대화 인덱스를 쉼표(,)로 분리하여 nextIndices에 저장
@@ -44,7 +44,7 @@ public class DialogueParser : MonoBehaviour
                         }
                     }
                 }
-                else if(row.Length >= 5 && string.IsNullOrEmpty(row[3]))
+                else if(row.Length >= 6 && string.IsNullOrEmpty(row[3])) // 선택 대사가 없는 경우
                 {
                     string nextDialogueIndex = row[4].Trim();
                     if(!string.IsNullOrEmpty(nextDialogueIndex))
@@ -58,6 +58,10 @@ public class DialogueParser : MonoBehaviour
                         {
                             Debug.LogWarning($"다음 대화 인덱스 값 '{nextDialogueIndex}'을(를) 숫자로 변환할 수 없습니다.");
                         }
+                    }
+                    else if(!string.IsNullOrEmpty(row[5])) // 대사 종료 여부가 존재하면
+                    {
+                        dialogue.isEnd = true; // 대사 종료 여부 설정
                     }
                 }
                 // 선택지가 없는 경우
