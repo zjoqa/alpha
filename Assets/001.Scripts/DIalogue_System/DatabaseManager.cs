@@ -11,7 +11,7 @@ public class DatabaseManager : MonoBehaviour
     /// <summary>
     /// 대화 정보를 저장하는 딕셔너리
     /// </summary>
-    Dictionary<int, Dialogue> dialogueDic = new Dictionary<int, Dialogue>(); // 대화 정보를 저장하는 딕셔너리
+    public Dictionary<int, Dialogue> dialogueDic = new Dictionary<int, Dialogue>(); // 대화 정보를 저장하는 딕셔너리
 
     public static bool isFinish = false; // 대화 정보 로드 완료 여부
 
@@ -105,4 +105,9 @@ public class DatabaseManager : MonoBehaviour
         Debug.Log("새로운 챕터 데이터 로드 완료!");
     }
     */
+
+    public int GetDialogueLength()
+    {
+        return dialogueDic.Count;
+    }
 }
