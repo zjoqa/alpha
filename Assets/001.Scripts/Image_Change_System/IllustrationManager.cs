@@ -2,6 +2,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+
+
 public class IllustrationManager : MonoBehaviour
 {
     public Image illustrationImage;  // Canvas에 배치한 UI Image
