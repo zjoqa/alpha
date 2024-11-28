@@ -27,6 +27,15 @@ public class DialogueParser : MonoBehaviour
             {
                 contextList.Add(row[2]); // 임시 리스트에 대화 내용 추가
                 
+                // 일러스트 인덱스 파싱 (CSV 파일의 6번째 열에 있다고 가정)
+                if (row.Length >= 7 && !string.IsNullOrEmpty(row[6]) && string.IsNullOrEmpty(row[3]))
+                {
+                    if (int.TryParse(row[6].Trim(), out int illIndex))
+                    {
+                        dialogue.illustrationIndex = illIndex;
+                    }
+                }
+                
                 // 선택지가 존재하는 경우
                 if (row.Length >= 6 && !string.IsNullOrEmpty(row[3]) && !string.IsNullOrEmpty(row[4]))
                 {
@@ -36,11 +45,18 @@ public class DialogueParser : MonoBehaviour
                     if (choiceTexts.Length == nextIndices.Length) // 선택지 텍스트와 다음 대화 인덱스의 개수가 같은 경우
                     {
                         dialogue.choices = new DialogueChoice[choiceTexts.Length]; // 선택지 개수만큼 DialogueChoice을 담을 수 있는 빈 배열만 생성
+                        string[] illustrationIndices = row[5].Split('|');
+                        
                         for (int j = 0; j < choiceTexts.Length; j++) // 선택지 개수만큼 반복
                         {
                             dialogue.choices[j] = new DialogueChoice(); // 선택지 개수만큼 반복하여 실제 DialogueChoice 객체 할당
                             dialogue.choices[j].choiceText = choiceTexts[j].Trim(); // 선택지 텍스트 설정
                             dialogue.choices[j].nextDialogueIndex = int.Parse(nextIndices[j].Trim()); // 다음 대화 인덱스 설정
+                            
+                            if (illustrationIndices.Length > j && int.TryParse(illustrationIndices[j].Trim(), out int illIndex))
+                            {
+                                dialogue.choices[j].illustrationIndex = illIndex;
+                            }
                         }
                     }
                 }

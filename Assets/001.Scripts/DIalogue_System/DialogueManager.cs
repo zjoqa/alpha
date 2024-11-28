@@ -20,6 +20,8 @@ public class DialogueManager : MonoBehaviour
     private float startX = 0f; // 선택지 버튼 x 좌표
     [SerializeField]
     private Vector2 buttonSize = new Vector2(600f, 100f); // 선택지 버튼 크기
+    [SerializeField]
+    private IllustrationManager illustrationManager; // IllustrationManager 참조 추가
 
 
     public Dialogue[] dialogues;
@@ -34,6 +36,14 @@ public class DialogueManager : MonoBehaviour
 
     [Header("텍스트 출력 딜레이")]
     [SerializeField] float textDelay;
+
+    private void Start() {
+        illustrationManager = FindObjectOfType<IllustrationManager>();
+        if(illustrationManager == null)
+        {
+            Debug.LogError("IllustrationManager 찾을 수 없음");
+        }
+    }
 
     private void Update() {
         ShowDialouge();
@@ -111,6 +121,13 @@ public class DialogueManager : MonoBehaviour
         choicePanel.SetActive(false);
         ClearChoices();
         isChoice = false;
+
+        if(illustrationManager != null) // IllustrationManager 존재 여부 확인
+        {
+            illustrationManager.ChangeIllustration(choice.illustrationIndex); // 선택지에 따른 일러스트 변경
+        }
+
+        // 선택지 인덱스가 유효한 경우
         if (choice.nextDialogueIndex >= 0 && choice.nextDialogueIndex <= dialogues.Length)
         {
             lineCount = choice.nextDialogueIndex - 1;
@@ -161,6 +178,12 @@ public class DialogueManager : MonoBehaviour
     {
         string t_ReplaceText = dialogues[lineCount].contexts[contextCount]; // 대사 가져오기
         t_ReplaceText = t_ReplaceText.Replace("'", ","); // 대사에서 쉼표(,)로 대체
+
+        // 현재 대화에 일러스트 인덱스가 지정되어 있다면 변경
+        if (dialogues[lineCount].illustrationIndex >= 0)
+        {
+            illustrationManager.ChangeIllustration(dialogues[lineCount].illustrationIndex);
+        }
 
         txt_Name.text = dialogues[lineCount].name; // 이름 표시
         txt_Dialogue.text = ""; // 대사 초기화

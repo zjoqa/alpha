@@ -7,6 +7,7 @@ public class DialogueChoice
 {
     public string choiceText;
     public int nextDialogueIndex;
+    public int illustrationIndex; // 선택지에 따른 일러스트 인덱스 추가
 }
 
 [System.Serializable]
@@ -25,6 +26,9 @@ public class Dialogue
     public bool isEnd;
 
     public int _nextDialogueIndex;
+    
+    [Tooltip("일러스트 인덱스")]
+    public int illustrationIndex = -1; // -1은 일러스트 변경 없음을 의미
 }
 
 [System.Serializable]

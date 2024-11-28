@@ -20,13 +20,6 @@ public class IllustrationManager : MonoBehaviour
         ChangeIllustration(0);
     }
 
-    private void Update()
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-            ChangeIllustration(NextIllustrationIndex());
-        }
-    }
     public void ChangeIllustration(int index)
     {
         if(index >= 0 && index < illustrations.Length)
