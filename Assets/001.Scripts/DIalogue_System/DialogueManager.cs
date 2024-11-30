@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+
 public class DialogueManager : MonoBehaviour
 {
     [SerializeField]
@@ -33,6 +35,9 @@ public class DialogueManager : MonoBehaviour
 
     int lineCount = 0; // 대화 카운트
     int contextCount = 0; // 대사 카운트
+    int flagCount = 0; // 플래그 카운트
+    
+    string currentFlag = ""; // 현재 플래그
 
     [Header("텍스트 출력 딜레이")]
     [SerializeField] float textDelay;
@@ -51,7 +56,7 @@ public class DialogueManager : MonoBehaviour
 
     private void ShowDialouge()
     {
-                if(!isDialogue || !isNext || !Input.GetKeyDown(KeyCode.Space)) return;
+        if(!isDialogue || !isNext || !Input.GetKeyDown(KeyCode.Space)) return;
         
         isNext = false;
         txt_Dialogue.text = "";
@@ -63,7 +68,8 @@ public class DialogueManager : MonoBehaviour
             return;
         }
         
-        // 현재 대화의 다음 문장이 있는 경우
+        // 한 캐릭터가 대사를 두개 이상 칠 때
+        // 엔터 누르고 ID 비워두고 대사
         if(contextCount + 1 < dialogues[lineCount].contexts.Length) 
         {
             contextCount++;
@@ -72,7 +78,10 @@ public class DialogueManager : MonoBehaviour
         }
         
         // 현재 대화가 끝난 경우
-        contextCount = 0;
+        if(isFinish)
+        {
+            contextCount = 0;
+        }
         
         // 다음 대사 번호가 지정된 경우
         if(dialogues[lineCount]._nextDialogueIndex > 0)
@@ -84,6 +93,7 @@ public class DialogueManager : MonoBehaviour
                 return;
             }
         }
+
         // 다음 순차적인 대화가 있는 경우
         else if(lineCount + 1 < dialogues.Length)
         {
@@ -111,7 +121,8 @@ public class DialogueManager : MonoBehaviour
             rectTransform.sizeDelta = buttonSize; 
 
             DialogueChoiceButton choiceButtonComponent = choiceButton.GetComponent<DialogueChoiceButton>();
-            choiceButtonComponent.Setup(choices[i], OnChoiceSelected); // 
+            choiceButtonComponent.Setup(choices[i], OnChoiceSelected); 
+            Debug.Log(choices[i].flag + "플래그 버튼에 추가");
         }
     }
 
@@ -122,9 +133,9 @@ public class DialogueManager : MonoBehaviour
         ClearChoices();
         isChoice = false;
 
-        if(illustrationManager != null) // IllustrationManager 존재 여부 확인
+        if (illustrationManager != null)
         {
-            illustrationManager.ChangeIllustration(choice.illustrationIndex); // 선택지에 따른 일러스트 변경
+            illustrationManager.ChangeIllustration(choice.illustrationIndex);
         }
 
         // 선택지 인덱스가 유효한 경우
@@ -134,7 +145,34 @@ public class DialogueManager : MonoBehaviour
             contextCount = 0;
             txt_Dialogue.text = "";
             txt_Name.text = "";
-            
+
+            // 선택된 플래그 설정
+            if (!string.IsNullOrEmpty(dialogues[lineCount].flag))
+            {
+                currentFlag = dialogues[lineCount].flag; // 플래그를 배열이 아닌 문자열로 처리
+                Debug.Log($"{currentFlag} 현재 플래그 설정");
+                bool foundCurrentLine = false;
+
+                for (int i = 0; i < dialogues.Length; i++)
+                {
+                    if (i == lineCount)
+                    {
+                        foundCurrentLine = true;
+                        continue;
+                    }
+
+                    // 현재 라인 이후에 같은 플래그를 가진 대화를 찾음
+                    if (foundCurrentLine && 
+                        !string.IsNullOrEmpty(dialogues[i].flag) && 
+                        dialogues[i].flag.Equals(currentFlag)) // Contains 대신 Equals 사용
+                    {
+                        lineCount = i;
+                        Debug.Log($"플래그 {currentFlag}를 가진 대화 {i}로 이동");
+                        break;
+                    }
+                }
+            }
+
             StartCoroutine(TypeWriter());
         }
         else
