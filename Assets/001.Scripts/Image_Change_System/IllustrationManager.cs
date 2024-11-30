@@ -11,6 +11,7 @@ public class IllustrationManager : MonoBehaviour
     public FadeEffect theFade;
 
     private int currentIndex = 0;
+    private string currentName;
 
     private void Start()
     {
@@ -20,14 +21,29 @@ public class IllustrationManager : MonoBehaviour
         ChangeIllustration(0);
     }
 
-    public void ChangeIllustration(int index)
+    public void ChangeIllustration(int index, string name = null)
     {
-        if(index >= 0 && index < illustrations.Length)
+        if(index < illustrations.Length)
         {
-            theFade.OnFade(FadeState.FadeOut);
-            illustrationImage.sprite = illustrations[index];
-            currentIndex = index;
-            theFade.OnFade(FadeState.FadeIn);
+            // 일러스트 인덱스가 비어있지 않을 때만 변경 작업 수행
+            if(!string.IsNullOrEmpty(index.ToString()))
+            {
+                // 이름이 있고, 이전 대사와 현재 대사의 이름이 다를 때만 페이드
+                if(name != null && currentName != name)
+                {
+                    theFade.OnFade(FadeState.FadeOut);
+                    illustrationImage.sprite = illustrations[index];
+                    theFade.OnFade(FadeState.FadeIn);
+                    currentName = name;
+                }
+                else
+                {
+                    // 같은 캐릭터의 연속된 대사일 경우 페이드 없이 일러스트만 변경
+                    illustrationImage.sprite = illustrations[index];
+                }
+                currentIndex = index;
+            }
+            // 일러스트 인덱스가 비어있으면 아무 작업도 하지 않음 (이전 일러스트 유지)
         }
         else
         {
@@ -39,5 +55,4 @@ public class IllustrationManager : MonoBehaviour
     {
         return (currentIndex + 1) % illustrations.Length;
     }
-
 }

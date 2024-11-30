@@ -135,7 +135,7 @@ public class DialogueManager : MonoBehaviour
 
         if (illustrationManager != null)
         {
-            illustrationManager.ChangeIllustration(choice.illustrationIndex);
+            illustrationManager.ChangeIllustration(choice.illustrationIndex , dialogues[lineCount].name);
         }
 
         // 선택지 인덱스가 유효한 경우
@@ -220,7 +220,7 @@ public class DialogueManager : MonoBehaviour
         // 현재 대화에 일러스트 인덱스가 지정되어 있다면 변경
         if (dialogues[lineCount].illustrationIndex >= 0)
         {
-            illustrationManager.ChangeIllustration(dialogues[lineCount].illustrationIndex);
+            illustrationManager.ChangeIllustration(dialogues[lineCount].illustrationIndex , dialogues[lineCount].name);
         }
 
         txt_Name.text = dialogues[lineCount].name; // 이름 표시
